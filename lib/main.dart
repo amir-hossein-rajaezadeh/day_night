@@ -29,24 +29,28 @@ class MyHomePage extends StatefulWidget {
   State<MyHomePage> createState() => _MyHomePageState();
 }
 
-class _MyHomePageState extends State<MyHomePage>
-    with SingleTickerProviderStateMixin {
+class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
   late AnimationController _animationController;
   late Animation<Offset> _animation;
   late Animation<Offset> _mainAnimation;
+  late final AnimationController _controller;
+  late final AnimationController _controller2;
 
+  late final Animation<Offset> _offsetAnimation;
+  late final Animation<Offset> _offsetAnimation2;
+  bool sunGone = false;
   int switchStatus = 0;
-
+  bool moonIsGone = true;
   @override
   void initState() {
     super.initState();
     _animationController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 500),
+      duration: const Duration(milliseconds: 370),
     );
     _animation = Tween<Offset>(
-      begin: const Offset(0, 0),
-      end: const Offset(-1.25, 0.0),
+      begin: Offset.zero,
+      end: const Offset(0, 1.5),
     ).animate(
       CurvedAnimation(parent: _animationController, curve: Curves.bounceOut),
     );
@@ -57,6 +61,31 @@ class _MyHomePageState extends State<MyHomePage>
     ).animate(
       CurvedAnimation(parent: _animationController, curve: Curves.bounceOut),
     );
+
+    _controller = AnimationController(
+      duration: const Duration(milliseconds: 1200),
+      vsync: this,
+    );
+    _controller2 = AnimationController(
+      duration: const Duration(milliseconds: 1200),
+      vsync: this,
+    );
+    _offsetAnimation = Tween<Offset>(
+      begin: Offset.zero,
+      end: const Offset(0.0, -0.8),
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.elasticIn));
+    _offsetAnimation2 = Tween<Offset>(
+      begin: Offset.zero,
+      end: const Offset(0.0, -1.2),
+    ).animate(CurvedAnimation(parent: _controller2, curve: Curves.elasticIn));
+
+    _offsetAnimation.addStatusListener((status) {
+      if (status == AnimationStatus.completed) {
+        setState(() {
+          sunGone = true;
+        });
+      }
+    });
   }
 
   @override
@@ -90,18 +119,42 @@ class _MyHomePageState extends State<MyHomePage>
           )),
           width: width,
           height: height,
-          child: Stack(
-            alignment: Alignment.center,
+          child: Column(
             children: [
-              AnimatedPositioned(
-                width: switchStatus != 1 ? 200 : 0,
-                top: switchStatus != 1 ? 120 : 100,
-                duration: const Duration(milliseconds: 200),
+              Container(
+                margin: EdgeInsets.only(top: 120),
+                width: width,
+                height: 2,
+                color: Colors.transparent,
+              ),
+              SlideTransition(
+                position: _offsetAnimation,
                 child: Container(
-                  margin: const EdgeInsets.only(top: 0),
-                  child: Image.asset("assets/images/sun_cloud.png"),
+                  height: 200,
+                  margin: const EdgeInsets.only(top: 40),
+                  child: sunGone
+                      ? null
+                      : Image.asset("assets/images/sun_cloud.png"),
                 ),
               ),
+              Container(
+                margin: const EdgeInsets.only(top: 40),
+                width: width,
+                height: 2,
+                color: Colors.transparent,
+              ),
+              moonIsGone
+                  ? Container(
+                      height: 200,
+                    )
+                  : SlideTransition(
+                      position: _offsetAnimation2,
+                      child: Container(
+                        height: 200,
+                        margin: const EdgeInsets.only(top: 0),
+                        child: Image.asset("assets/images/night_moon.png"),
+                      ),
+                    ),
               // switchStatus != 1
               //     ? Container(
               //         margin: const EdgeInsets.only(top: 180),
@@ -112,7 +165,7 @@ class _MyHomePageState extends State<MyHomePage>
               //         child: Image.asset("assets/images/night_moon.png"),
               //       ),
               Container(
-                margin: const EdgeInsets.only(top: 164),
+                margin: const EdgeInsets.only(top: 0),
                 child: Text(
                   switchStatus != 1
                       ? "Have a Good Day!"
@@ -143,7 +196,7 @@ class _MyHomePageState extends State<MyHomePage>
                       child: SlideTransition(
                         position: _animation,
                         child: InkWell(
-                          onTap: () {
+                          onTap: () async {
                             if (switchStatus == 2 || switchStatus == 0) {
                               _animation = Tween<Offset>(
                                 begin: _animation.value,
@@ -161,6 +214,10 @@ class _MyHomePageState extends State<MyHomePage>
                                     parent: _animationController,
                                     curve: Curves.ease),
                               );
+
+                              _controller
+                                ..reset()
+                                ..forward();
 
                               setState(() {
                                 switchStatus = 1;
@@ -189,6 +246,8 @@ class _MyHomePageState extends State<MyHomePage>
                                     parent: _animationController,
                                     curve: Curves.ease),
                               );
+
+                              _controller.reverse();
                               setState(() {
                                 switchStatus = 2;
                               });
@@ -197,6 +256,12 @@ class _MyHomePageState extends State<MyHomePage>
                                 ..forward();
                               print("switch is 1 and be 2");
                             }
+                            _controller2.forward();
+
+                            await Future.delayed(Duration(milliseconds: 900));
+                            setState(() {
+                              moonIsGone = false;
+                            });
                           },
                           child: Container(
                             margin: const EdgeInsets.only(right: 18),
