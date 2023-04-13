@@ -256,12 +256,30 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                                 ..forward();
                               print("switch is 1 and be 2");
                             }
-                            _controller2.forward();
 
-                            await Future.delayed(Duration(milliseconds: 900));
-                            setState(() {
-                              moonIsGone = false;
-                            });
+                            if (switchStatus == 1) {
+                              _controller2.forward();
+                              await Future.delayed(
+                                  const Duration(milliseconds: 900));
+                              setState(() {
+                                moonIsGone = false;
+                              });
+                            } else {
+                              print("hereeee");
+                              _controller.reverse();
+                              setState(() {
+                                sunGone = false;
+                              });
+
+                              _controller2.reverse();
+
+                              await Future.delayed(
+                                Duration(milliseconds: 150),
+                              );
+                              setState(() {
+                                moonIsGone = true;
+                              });
+                            }
                           },
                           child: Container(
                             margin: const EdgeInsets.only(right: 18),
