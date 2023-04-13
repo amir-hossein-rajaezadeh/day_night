@@ -72,7 +72,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
     );
     _offsetAnimation = Tween<Offset>(
       begin: Offset.zero,
-      end: const Offset(0.0, -0.8),
+      end: const Offset(0.0, -0.9),
     ).animate(CurvedAnimation(parent: _controller, curve: Curves.elasticIn));
     _offsetAnimation2 = Tween<Offset>(
       begin: Offset.zero,
@@ -155,15 +155,6 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                         child: Image.asset("assets/images/night_moon.png"),
                       ),
                     ),
-              // switchStatus != 1
-              //     ? Container(
-              //         margin: const EdgeInsets.only(top: 180),
-              //         child: Image.asset("assets/images/sun_cloud.png"),
-              //       )
-              //     : Container(
-              //         margin: const EdgeInsets.only(top: 180),
-              //         child: Image.asset("assets/images/night_moon.png"),
-              //       ),
               Container(
                 margin: const EdgeInsets.only(top: 0),
                 child: Text(
@@ -260,21 +251,21 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                             if (switchStatus == 1) {
                               _controller2.forward();
                               await Future.delayed(
-                                  const Duration(milliseconds: 900));
+                                const Duration(milliseconds: 985),
+                              );
                               setState(() {
                                 moonIsGone = false;
                               });
                             } else {
                               print("hereeee");
                               _controller.reverse();
+                              _controller2.reverse();
                               setState(() {
                                 sunGone = false;
                               });
 
-                              _controller2.reverse();
-
                               await Future.delayed(
-                                Duration(milliseconds: 150),
+                                const Duration(milliseconds: 150),
                               );
                               setState(() {
                                 moonIsGone = true;
