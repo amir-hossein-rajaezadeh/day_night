@@ -1,4 +1,4 @@
-import 'dart:math' show pi;
+import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 
@@ -18,6 +18,25 @@ class MyApp extends StatelessWidget {
       home: const MyHomePage(),
     );
   }
+}
+
+List<Color> changeBackgroundColor(int switchStatus) {
+  Color color1;
+  Color color2;
+
+  if (switchStatus != 1) {
+    color1 = const Color(0xFFADD478);
+  } else {
+    color1 = const Color(0xFF1B2139);
+  }
+
+  if (switchStatus != 1) {
+    color2 = const Color(0xFF2F7775);
+  } else {
+    color2 = const Color(0xFF8581FF);
+  }
+
+  return [color1, color2];
 }
 
 class MyHomePage extends StatefulWidget {
@@ -46,7 +65,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
     super.initState();
     _animationController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 370),
+      duration: const Duration(milliseconds: 500),
     );
     _animation = Tween<Offset>(
       begin: Offset.zero,
@@ -73,11 +92,11 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
     _offsetAnimation = Tween<Offset>(
       begin: Offset.zero,
       end: const Offset(0.0, -0.9),
-    ).animate(CurvedAnimation(parent: _controller, curve: Curves.elasticIn));
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInCirc));
     _offsetAnimation2 = Tween<Offset>(
       begin: Offset.zero,
       end: const Offset(0.0, -1.2),
-    ).animate(CurvedAnimation(parent: _controller2, curve: Curves.elasticIn));
+    ).animate(CurvedAnimation(parent: _controller2, curve: Curves.easeInCirc));
 
     _offsetAnimation.addStatusListener((status) {
       if (status == AnimationStatus.completed) {
@@ -94,6 +113,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
     super.dispose();
   }
 
+  // var _color = getRandomColor(switchStatus);
   @override
   Widget build(BuildContext context) {
     double width = MediaQuery.of(context).size.width;
@@ -101,31 +121,24 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
 
     return Scaffold(
       body: SafeArea(
-        child: Container(
+        child: AnimatedContainer(
           decoration: BoxDecoration(
-              gradient: LinearGradient(
-            begin: Alignment.topRight,
-            end: Alignment.bottomLeft,
-            colors: [
-              if (switchStatus != 1)
-                const Color(0xFFADD478)
-              else
-                const Color(0xFF1B2139),
-              if (switchStatus != 1)
-                const Color(0xFF2F7775)
-              else
-                const Color(0xFF8581FF),
-            ],
-          )),
+            gradient: LinearGradient(
+              begin: Alignment.topRight,
+              end: Alignment.bottomLeft,
+              colors: changeBackgroundColor(switchStatus),
+            ),
+          ),
           width: width,
           height: height,
+          duration: const Duration(milliseconds: 1500),
           child: Column(
             children: [
               Container(
-                margin: EdgeInsets.only(top: 120),
+                margin: const EdgeInsets.only(top: 0),
                 width: width,
                 height: 2,
-                color: Colors.transparent,
+                color: Colors.white,
               ),
               SlideTransition(
                 position: _offsetAnimation,
@@ -265,7 +278,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                               });
 
                               await Future.delayed(
-                                const Duration(milliseconds: 150),
+                                const Duration(milliseconds: 100),
                               );
                               setState(() {
                                 moonIsGone = true;
