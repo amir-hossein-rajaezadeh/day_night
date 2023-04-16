@@ -1,9 +1,13 @@
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 void main() {
   runApp(const MyApp());
+  SystemChrome.setSystemUIOverlayStyle(
+    const SystemUiOverlayStyle(statusBarColor: Colors.transparent),
+  );
 }
 
 class MyApp extends StatelessWidget {
@@ -55,9 +59,13 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
   late final AnimationController _controller;
   late final AnimationController _controller2;
 
+  late final Animation<Offset> _switchBCKDayOffsetAnimation;
+  late final Animation<Offset> _switchBCKNightOffsetAnimation;
+
   late final Animation<Offset> _offsetAnimation;
   late final Animation<Offset> _offsetAnimation2;
   bool sunGone = false;
+  bool showNightSwitch = false;
   int switchStatus = 0;
   bool moonIsGone = true;
   @override
@@ -65,7 +73,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
     super.initState();
     _animationController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 500),
+      duration: const Duration(milliseconds: 600),
     );
     _animation = Tween<Offset>(
       begin: Offset.zero,
@@ -93,6 +101,17 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
       begin: Offset.zero,
       end: const Offset(0.0, -0.9),
     ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInCirc));
+
+    _switchBCKDayOffsetAnimation = Tween<Offset>(
+      begin: Offset.zero,
+      end: const Offset(0.0, -1),
+    ).animate(_controller);
+
+    _switchBCKNightOffsetAnimation = Tween<Offset>(
+      begin: Offset.zero,
+      end: const Offset(0.0, -1.2),
+    ).animate(_controller2);
+
     _offsetAnimation2 = Tween<Offset>(
       begin: Offset.zero,
       end: const Offset(0.0, -1.2),
@@ -110,6 +129,8 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
   @override
   void dispose() {
     _animationController.dispose();
+    _controller.dispose();
+    _controller2.dispose();
     super.dispose();
   }
 
@@ -121,6 +142,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
 
     return Scaffold(
       body: SafeArea(
+        top: false,
         child: AnimatedContainer(
           decoration: BoxDecoration(
             gradient: LinearGradient(
@@ -138,13 +160,12 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                 margin: const EdgeInsets.only(top: 0),
                 width: width,
                 height: 2,
-                color: Colors.white,
               ),
               SlideTransition(
                 position: _offsetAnimation,
                 child: Container(
                   height: 200,
-                  margin: const EdgeInsets.only(top: 40),
+                  margin: const EdgeInsets.only(top: 80),
                   child: sunGone
                       ? null
                       : Image.asset("assets/images/sun_cloud.png"),
@@ -168,32 +189,73 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                         child: Image.asset("assets/images/night_moon.png"),
                       ),
                     ),
+              switchStatus != 1
+                  ? FadeTransition(
+                      opacity: _animationController,
+                      child: Text(
+                        "Have a Good Day!",
+                        style: Theme.of(context)
+                            .textTheme
+                            .displayLarge!
+                            .copyWith(
+                                fontSize: 32,
+                                fontWeight: FontWeight.w600,
+                                color: Colors.white),
+                      ),
+                    )
+                  : FadeTransition(
+                      opacity: _controller2,
+                      child: Text(
+                        "Have a Sweet Dream!",
+                        style: Theme.of(context)
+                            .textTheme
+                            .displayLarge!
+                            .copyWith(
+                                fontSize: 32,
+                                fontWeight: FontWeight.w600,
+                                color: Colors.white),
+                      )),
               Container(
-                margin: const EdgeInsets.only(top: 0),
-                child: Text(
-                  switchStatus != 1
-                      ? "Have a Good Day!"
-                      : "Have a Sweet Dream!",
-                  style: Theme.of(context).textTheme.displayLarge!.copyWith(
-                      fontSize: 32,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.white),
-                ),
-              ),
-              Container(
-                margin: const EdgeInsets.only(top: 0),
+                margin: const EdgeInsets.only(top: 60),
                 width: 220,
-                height: 82,
+                height: 90,
                 child: Stack(
                   alignment: Alignment.center,
                   children: [
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(100),
-                      child: Image.asset(
-                          switchStatus != 1
-                              ? "assets/images/day_switch_pic.png"
-                              : "assets/images/night_switch_pic.png",
-                          fit: BoxFit.cover),
+                    Column(
+                      children: [
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(100),
+                          child: SlideTransition(
+                            position: _offsetAnimation,
+                            child: Container(
+                              height: 85,
+                              margin: const EdgeInsets.only(top: 0),
+                              child: sunGone
+                                  ? null
+                                  : Image.asset(
+                                      "assets/images/day_switch_pic.png"),
+                            ),
+                          ),
+                        ),
+                        Container(
+                          height: 20,
+                        ),
+                        !showNightSwitch
+                            ? Container()
+                            : SlideTransition(
+                                position: _switchBCKNightOffsetAnimation,
+                                child: ClipRRect(
+                                  borderRadius: BorderRadius.circular(100),
+                                  child: Container(
+                                    height: 85,
+                                    margin: const EdgeInsets.only(top: 0),
+                                    child: Image.asset(
+                                        "assets/images/night_switch_pic.png"),
+                                  ),
+                                ),
+                              ),
+                      ],
                     ),
                     Align(
                       alignment: Alignment.centerRight,
@@ -264,7 +326,14 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                             if (switchStatus == 1) {
                               _controller2.forward();
                               await Future.delayed(
-                                const Duration(milliseconds: 985),
+                                const Duration(milliseconds: 800),
+                              );
+                              setState(() {
+                                showNightSwitch = true;
+                              });
+
+                              await Future.delayed(
+                                const Duration(milliseconds: 100),
                               );
                               setState(() {
                                 moonIsGone = false;
@@ -282,6 +351,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                               );
                               setState(() {
                                 moonIsGone = true;
+                                showNightSwitch = false;
                               });
                             }
                           },
