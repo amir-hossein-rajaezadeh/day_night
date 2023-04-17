@@ -59,8 +59,6 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
   late final AnimationController _controller;
   late final AnimationController _controller2;
 
-  late final Animation<Offset> _switchBCKNightOffsetAnimation;
-
   late final Animation<Offset> _offsetAnimation;
   late final Animation<Offset> _offsetAnimation2;
   bool sunGone = false;
@@ -101,11 +99,6 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
       end: const Offset(0.0, -1.1),
     ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInCirc));
 
-    _switchBCKNightOffsetAnimation = Tween<Offset>(
-      begin: Offset(0, -0.0),
-      end: const Offset(0.0, -1.4),
-    ).animate(_controller2);
-
     _offsetAnimation2 = Tween<Offset>(
       begin: Offset.zero,
       end: const Offset(0.0, -1.2),
@@ -128,7 +121,6 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
     super.dispose();
   }
 
-  // var _color = getRandomColor(switchStatus);
   @override
   Widget build(BuildContext context) {
     double width = MediaQuery.of(context).size.width;
@@ -212,7 +204,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
               Container(
                 margin: const EdgeInsets.only(top: 60),
                 width: 220,
-                height: 180,
+                height: 90,
                 child: Stack(
                   alignment: Alignment.center,
                   children: [
@@ -241,7 +233,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                             if (switchStatus == 2 || switchStatus == 0) {
                               _animation = Tween<Offset>(
                                 begin: _animation.value,
-                                end: const Offset(-1.42, 0.0),
+                                end: const Offset(-1.8, 0.0),
                               ).animate(
                                 CurvedAnimation(
                                     parent: _animationController,
@@ -331,7 +323,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                             }
                           },
                           child: Container(
-                            margin: const EdgeInsets.only(right: 18),
+                            margin: const EdgeInsets.only(right: 10),
                             width: 65,
                             height: 65,
                             decoration: BoxDecoration(
