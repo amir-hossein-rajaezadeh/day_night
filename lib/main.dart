@@ -59,7 +59,6 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
   late final AnimationController _controller;
   late final AnimationController _controller2;
 
-  late final Animation<Offset> _switchBCKDayOffsetAnimation;
   late final Animation<Offset> _switchBCKNightOffsetAnimation;
 
   late final Animation<Offset> _offsetAnimation;
@@ -99,17 +98,12 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
     );
     _offsetAnimation = Tween<Offset>(
       begin: Offset.zero,
-      end: const Offset(0.0, -0.9),
+      end: const Offset(0.0, -1.1),
     ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInCirc));
 
-    _switchBCKDayOffsetAnimation = Tween<Offset>(
-      begin: Offset.zero,
-      end: const Offset(0.0, -1),
-    ).animate(_controller);
-
     _switchBCKNightOffsetAnimation = Tween<Offset>(
-      begin: Offset.zero,
-      end: const Offset(0.0, -1.2),
+      begin: Offset(0, -0.0),
+      end: const Offset(0.0, -1.4),
     ).animate(_controller2);
 
     _offsetAnimation2 = Tween<Offset>(
@@ -218,44 +212,25 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
               Container(
                 margin: const EdgeInsets.only(top: 60),
                 width: 220,
-                height: 90,
+                height: 180,
                 child: Stack(
                   alignment: Alignment.center,
                   children: [
-                    Column(
-                      children: [
-                        ClipRRect(
-                          borderRadius: BorderRadius.circular(100),
-                          child: SlideTransition(
-                            position: _offsetAnimation,
-                            child: Container(
-                              height: 85,
-                              margin: const EdgeInsets.only(top: 0),
-                              child: sunGone
-                                  ? null
-                                  : Image.asset(
-                                      "assets/images/day_switch_pic.png"),
-                            ),
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(100),
+                      child: SlideTransition(
+                        position: _offsetAnimation,
+                        child: Container(
+                          height: 85,
+                          margin: const EdgeInsets.only(top: 0),
+                          child: Column(
+                            children: [
+                              Image.asset("assets/images/day_switch_pic.png"),
+                              Image.asset("assets/images/night_switch_pic.png")
+                            ],
                           ),
                         ),
-                        Container(
-                          height: 20,
-                        ),
-                        !showNightSwitch
-                            ? Container()
-                            : SlideTransition(
-                                position: _switchBCKNightOffsetAnimation,
-                                child: ClipRRect(
-                                  borderRadius: BorderRadius.circular(100),
-                                  child: Container(
-                                    height: 85,
-                                    margin: const EdgeInsets.only(top: 0),
-                                    child: Image.asset(
-                                        "assets/images/night_switch_pic.png"),
-                                  ),
-                                ),
-                              ),
-                      ],
+                      ),
                     ),
                     Align(
                       alignment: Alignment.centerRight,
