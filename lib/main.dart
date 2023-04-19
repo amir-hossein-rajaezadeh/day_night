@@ -1,5 +1,3 @@
-import 'dart:math' as math;
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -53,14 +51,10 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
-  late AnimationController _animationController;
-  late Animation<Offset> _animation;
-  late Animation<Offset> _mainAnimation;
-  late final AnimationController _controller;
-  late final AnimationController _controller2;
-
-  late final Animation<Offset> _offsetAnimation;
-  late final Animation<Offset> _offsetAnimation2;
+  late AnimationController _switchAnimationController;
+  late Animation<Offset> _switchAnimation;
+  late final AnimationController _dayAndNightPhotoController;
+  late final Animation<Offset> _dayNightPhotoAndVerticalSwitchAnimation;
   bool sunGone = false;
   bool showNightSwitch = false;
   int switchStatus = 0;
@@ -68,43 +62,30 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
   @override
   void initState() {
     super.initState();
-    _animationController = AnimationController(
+    _switchAnimationController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 600),
+      duration: const Duration(milliseconds: 800),
     );
-    _animation = Tween<Offset>(
+    _switchAnimation = Tween<Offset>(
       begin: Offset.zero,
       end: const Offset(0, 1.5),
     ).animate(
-      CurvedAnimation(parent: _animationController, curve: Curves.bounceOut),
+      CurvedAnimation(
+          parent: _switchAnimationController, curve: Curves.bounceOut),
     );
 
-    _mainAnimation = Tween<Offset>(
-      begin: const Offset(0, 0),
-      end: const Offset(0, -0.5),
-    ).animate(
-      CurvedAnimation(parent: _animationController, curve: Curves.bounceOut),
+    _dayAndNightPhotoController = AnimationController(
+      duration: const Duration(milliseconds: 600),
+      vsync: this,
     );
 
-    _controller = AnimationController(
-      duration: const Duration(milliseconds: 1200),
-      vsync: this,
-    );
-    _controller2 = AnimationController(
-      duration: const Duration(milliseconds: 1200),
-      vsync: this,
-    );
-    _offsetAnimation = Tween<Offset>(
+    _dayNightPhotoAndVerticalSwitchAnimation = Tween<Offset>(
       begin: Offset.zero,
       end: const Offset(0.0, -1.1),
-    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInCirc));
+    ).animate(CurvedAnimation(
+        parent: _dayAndNightPhotoController, curve: Curves.easeInCirc));
 
-    _offsetAnimation2 = Tween<Offset>(
-      begin: Offset.zero,
-      end: const Offset(0.0, -1.2),
-    ).animate(CurvedAnimation(parent: _controller2, curve: Curves.easeInCirc));
-
-    _offsetAnimation.addStatusListener((status) {
+    _dayNightPhotoAndVerticalSwitchAnimation.addStatusListener((status) {
       if (status == AnimationStatus.completed) {
         setState(() {
           sunGone = true;
@@ -115,9 +96,8 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
 
   @override
   void dispose() {
-    _animationController.dispose();
-    _controller.dispose();
-    _controller2.dispose();
+    _switchAnimationController.dispose();
+    _dayAndNightPhotoController.dispose();
     super.dispose();
   }
 
@@ -139,7 +119,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
           ),
           width: width,
           height: height,
-          duration: const Duration(milliseconds: 1500),
+          duration: const Duration(milliseconds: 900),
           child: Column(
             children: [
               Container(
@@ -148,7 +128,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                 height: 2,
               ),
               SlideTransition(
-                position: _offsetAnimation,
+                position: _dayNightPhotoAndVerticalSwitchAnimation,
                 child: Container(
                   height: 200,
                   margin: const EdgeInsets.only(top: 80),
@@ -168,7 +148,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                       height: 200,
                     )
                   : SlideTransition(
-                      position: _offsetAnimation2,
+                      position: _dayNightPhotoAndVerticalSwitchAnimation,
                       child: Container(
                         height: 200,
                         margin: const EdgeInsets.only(top: 0),
@@ -177,7 +157,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                     ),
               switchStatus != 1
                   ? FadeTransition(
-                      opacity: _animationController,
+                      opacity: _switchAnimationController,
                       child: Text(
                         "Have a Good Day!",
                         style: Theme.of(context)
@@ -190,7 +170,8 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                       ),
                     )
                   : FadeTransition(
-                      opacity: _controller2,
+                      //
+                      opacity: _dayAndNightPhotoController,
                       child: Text(
                         "Have a Sweet Dream!",
                         style: Theme.of(context)
@@ -211,7 +192,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                     ClipRRect(
                       borderRadius: BorderRadius.circular(100),
                       child: SlideTransition(
-                        position: _offsetAnimation,
+                        position: _dayNightPhotoAndVerticalSwitchAnimation,
                         child: Container(
                           height: 85,
                           margin: const EdgeInsets.only(top: 0),
@@ -227,28 +208,20 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                     Align(
                       alignment: Alignment.centerRight,
                       child: SlideTransition(
-                        position: _animation,
+                        position: _switchAnimation,
                         child: InkWell(
                           onTap: () async {
                             if (switchStatus == 2 || switchStatus == 0) {
-                              _animation = Tween<Offset>(
-                                begin: _animation.value,
+                              _switchAnimation = Tween<Offset>(
+                                begin: _switchAnimation.value,
                                 end: const Offset(-1.8, 0.0),
                               ).animate(
                                 CurvedAnimation(
-                                    parent: _animationController,
+                                    parent: _switchAnimationController,
                                     curve: Curves.bounceOut),
                               );
-                              _mainAnimation = Tween<Offset>(
-                                begin: _mainAnimation.value,
-                                end: const Offset(0, -0.5),
-                              ).animate(
-                                CurvedAnimation(
-                                    parent: _animationController,
-                                    curve: Curves.ease),
-                              );
 
-                              _controller
+                              _dayAndNightPhotoController
                                 ..reset()
                                 ..forward();
 
@@ -256,44 +229,35 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                                 switchStatus = 1;
                               });
 
-                              _animationController
+                              _switchAnimationController
                                 ..reset()
                                 ..forward();
 
                               print("switch is 0 or 2  and  now is 1");
                             } else if (switchStatus == 1) {
-                              _animation = Tween<Offset>(
-                                begin: _animation.value,
+                              _switchAnimation = Tween<Offset>(
+                                begin: _switchAnimation.value,
                                 end: const Offset(0.0, 0.0),
                               ).animate(
                                 CurvedAnimation(
-                                    parent: _animationController,
+                                    parent: _switchAnimationController,
                                     curve: Curves.bounceOut),
                               );
 
-                              _mainAnimation = Tween<Offset>(
-                                begin: _mainAnimation.value,
-                                end: const Offset(0.0, 0.0),
-                              ).animate(
-                                CurvedAnimation(
-                                    parent: _animationController,
-                                    curve: Curves.ease),
-                              );
-
-                              _controller.reverse();
+                              _dayAndNightPhotoController.reverse();
                               setState(() {
                                 switchStatus = 2;
                               });
-                              _animationController
+                              _switchAnimationController
                                 ..reset()
                                 ..forward();
                               print("switch is 1 and be 2");
                             }
 
                             if (switchStatus == 1) {
-                              _controller2.forward();
+                              _dayAndNightPhotoController.forward();
                               await Future.delayed(
-                                const Duration(milliseconds: 800),
+                                const Duration(milliseconds: 400),
                               );
                               setState(() {
                                 showNightSwitch = true;
@@ -306,15 +270,13 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                                 moonIsGone = false;
                               });
                             } else {
-                              print("hereeee");
-                              _controller.reverse();
-                              _controller2.reverse();
+                              _dayAndNightPhotoController.reverse();
                               setState(() {
                                 sunGone = false;
                               });
 
                               await Future.delayed(
-                                const Duration(milliseconds: 100),
+                                const Duration(milliseconds: 130),
                               );
                               setState(() {
                                 moonIsGone = true;
